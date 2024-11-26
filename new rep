@@ -13,6 +13,8 @@
                                     <div class="block span3 col-3">
                                         <div class="card-group">
                                             <div class="card">
+                                                <a t-att-href="'/event-details/' + str(vals.id)">
+                                                <a t-attf-href="/event-details/${vals.id}">
                                                 <img class="card-img-top"
                                                      t-attf-src="data:image/png;base64,{{vals.photo}}"
                                                      style="padding: 0px; margin: 0px; height: 160px; width:305px;"/>
@@ -65,6 +67,12 @@ class EventController(http.Controller):
         }
         print("event",event)
         return request.render('school_management.template_event_details', events)
+
+
+@http.route('/event-details/<model("school.event"):event>', type="http", auth="user", website=True)
+def event_details(self, event):
+   return request.render('school_management.template_event_details', {
+      'event': event})
 
 
 <?xml version="1.0" encoding="utf-8"?>
