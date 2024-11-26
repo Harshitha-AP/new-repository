@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="latest_school_events_template" xml:space="preserve">
+   <t t-name="school_management.products_category_wise">
+       <div id="top_selling_products_carousel" class="container">
+           <a t-attf-href="/event-details/#{events.event}">
+           <div id="TopuniqueId" class="large-12 columns">
+               <div id="bestSellCarousel" class="container carousel slide" data-bs-ride="carousel"
+                    t-att-data-bs-interval="interval">
+                   <div class="carousel-inner row w-100 mx-auto" role="listbox">
+                        <t t-foreach="chunkData" t-as="data" t-key="data_index">
+                            <div class="row">
+                               <t t-foreach="data" t-as="vals" t-key="vals_index">
+                                    <div class="block span3 col-3">
+                                        <div class="card-group">
+                                            <div class="card">
+                                                <img class="card-img-top"
+                                                     t-attf-src="data:image/png;base64,{{vals.photo}}"
+                                                     style="padding: 0px; margin: 0px; height: 160px; width:305px;"/>
+                                                <div class="text-center">
+                                                    <h3 class="mb-0"><t t-esc="vals.name"/></h3>
+                                                    <h5 class="mb-0"><t t-esc="vals.start_date"/></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                               </t>
+                            </div>
+                        </t>
+                   </div>
+               </div>
+           </div>
+           </a>
+       </div>
+   </t>
+</templates>
+
+
+
+
+# -*- coding:utf-8 -*-
+
+from odoo import http
+from odoo.http import request
+
+class EventController(http.Controller):
+    @http.route(['/latest-events'], type="json", auth="public")
+    def latest_events(self):
+        events = request.env['school.event'].search([], order="create_date desc", limit=4)
+        event_data = []
+        for event in events:
+            event_data.append({
+                'id': event.id,
+                'name': event.name,
+                'period': event.period,
+                'start_date': event.start_date,
+                'end_date': event.end_date,
+                'photo': event.photo
+            })
+        return event_data
+
+    @http.route('/event-details/<model("school.event"):event>', type="http", auth="user", website=True)
+    def event_details(self, event):
+        events = {
+            'event': event,
+        }
+        print("event",event)
+        return request.render('school_management.template_event_details', events)
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="template_event_details" name="Event Details">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Hello</h1>
+                <div class="oe_structure"/>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="col-6">
+<!--                            <div class="eve_details">-->
+                                <h1 t-field="vals.name"/>
+    <!--                            <ul class="prod_desc_list">-->
+    <!--                                <li><t t-esc="product.brand"/></li>-->
+    <!--                                <li><t t-esc="product.category"/></li>-->
+    <!--                                <li><t t-esc="product.origin"/></li>-->
+    <!--                                <li><t t-esc="product.code"/></li>-->
+    <!--                            </ul>-->
+    <!--                            <span t-field="product.description"/>-->
+    <!--                            <div class="prod_buttons">-->
+    <!--                                <button class="btn btn-primary"-->
+    <!--                                        t-options="{'widget': 'button'}"/>-->
+    <!--                            </div>-->
+<!--                            </div>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
+
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="school_event_template" name="Events">
+        <section class="best_seller_product_snippet">
+           <div class="ref-arrival-content">
+               <div class="text-center">
+                <h1 class="ref-section_head ref-centerhead__underline ref-head--primary"
+                   style="color: #0d5272;">Latest Events
+                </h1>
+                   <br/>
+               </div>
+            </div>
+            <div id="top_selling_carousel"/>
+        </section>
+    </template>
+    <template id="external_snippets" inherit_id="website.snippets" priority="8">
+        <xpath expr="//snippets[@id='snippet_content']//t[@t-snippet][last()]" position="after">
+            <t t-snippet="school_management.school_event_template"/>
+        </xpath>
+    </template>
+</odoo>
+
+
+/** @odoo-module */
+
+
+import PublicWidget from "@web/legacy/js/public/public_widget";
+import { rpc } from "@web/core/network/rpc";
+import { renderToElement } from "@web/core/utils/render";
+
+console.log("1");
+
+function _chunk(array, size) {
+    const result = [];
+    console.log("2");
+    for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
+    console.log("result",result);
+}
+console.log("3");
+
+var LatestEventsSnippet = PublicWidget.Widget.extend({
+    selector: '.best_seller_product_snippet',
+    willStart: async function () {
+        this.data = await rpc('/latest-events', {})
+    },
+    start: function () {
+        const refElements = this.$el.find("#top_selling_carousel")
+        const chunkData = _chunk(this.data, 4)
+        console.log(chunkData,"chunkdata")
+        refElements.html(renderToElement('school_management.products_category_wise', {
+                chunkData
+        }))
+    },
+});
+console.log("6")
+PublicWidget.registry.latest_school_events_template = LatestEventsSnippet;
+return LatestEventsSnippet;
+
+
+
