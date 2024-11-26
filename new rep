@@ -169,4 +169,27 @@ PublicWidget.registry.latest_school_events_template = LatestEventsSnippet;
 return LatestEventsSnippet;
 
 
+<odoo>
+    <template id="template_event_details" name="Event Details">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h1><t t-esc="event.name"/></h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <img t-att-src="'data:image/png;base64,' + event.photo" alt="Event Image" class="img-fluid" style="width:100%;"/>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Start Date:</strong> <t t-esc="event.start_date"/></p>
+                        <p><strong>End Date:</strong> <t t-esc="event.end_date"/></p>
+                        <p><t t-esc="event.description"/></p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
 
