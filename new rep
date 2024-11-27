@@ -2,39 +2,50 @@
 <templates id="latest_school_events_template" xml:space="preserve">
    <t t-name="school_management.products_category_wise">
        <div id="top_selling_products_carousel" class="container">
-           <a t-attf-href="/event-details/#{events.event}">
            <div id="TopuniqueId" class="large-12 columns">
                <div id="bestSellCarousel" class="container carousel slide" data-bs-ride="carousel"
                     t-att-data-bs-interval="interval">
                    <div class="carousel-inner row w-100 mx-auto" role="listbox">
                         <t t-foreach="chunkData" t-as="data" t-key="data_index">
-                            <div class="row">
-                               <t t-foreach="data" t-as="vals" t-key="vals_index">
-                                    <div class="block span3 col-3">
-                                        <div class="card-group">
-                                            <div class="card">
-                                                <a t-att-href="'/event-details/' + str(vals.id)">
-                                                <a t-attf-href="/event-details/${vals.id}">
-                                                <img class="card-img-top"
-                                                     t-attf-src="data:image/png;base64,{{vals.photo}}"
-                                                     style="padding: 0px; margin: 0px; height: 160px; width:305px;"/>
-                                                <div class="text-center">
-                                                    <h3 class="mb-0"><t t-esc="vals.name"/></h3>
-                                                    <h5 class="mb-0"><t t-esc="vals.start_date"/></h5>
+                            <div t-att-class="data.is_active ? 'carousel-item active' : 'carousel-item'">
+                                <div class="row">
+                                   <t t-foreach="data" t-as="vals" t-key="vals_index">
+                                        <div class="block span3 col-3">
+                                            <div class="card-group">
+                                                <div class="card">
+                                                    <a t-attf-href="/event-details/#{vals.id}">
+                                                        <img class="card-img-top"
+                                                             t-attf-src="data:image/png;base64,{{vals.photo}}"
+                                                             style="padding: 0px; margin: 0px; height: 260px; width:305px;"/>
+                                                        <div class="text-center">
+                                                            <h3 class="mb-0"><t t-esc="vals.name"/></h3>
+                                                            <h5 class="mb-0"><t t-esc="vals.start_date"/></h5>
+                                                        </div>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                               </t>
+                                    </t>
+                                </div>
                             </div>
                         </t>
                    </div>
                </div>
+               <a id="template_previous" t-attf-href="#bestSellCarousel" class="carousel-control-prev" data-bs-slide="prev" role="button"
+                  aria-label="Previous" title="Previous">
+                    <span class="fa fa-chevron-circle-left fa-2x" style="color:black"/>
+                    <span class="visually-hidden">Previous</span>
+               </a>
+               <a id="template_next" t-attf-href="#bestSellCarousel" class="carousel-control-next" data-bs-slide="next" role="button"
+                  aria-label="Next" title="Next">
+                    <span class="fa fa-chevron-circle-right fa-2x" style="color:black"/>
+                   <span class="visually-hidden">Next</span>
+               </a>
            </div>
-           </a>
        </div>
    </t>
 </templates>
+
 
 
 
