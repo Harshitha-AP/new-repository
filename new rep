@@ -55,59 +55,6 @@
 
 
 
-
-<?xml version="1.0" encoding="UTF-8" ?>
-<templates id="latest_school_events_template" xml:space="preserve">
-   <t t-name="school_management.products_category_wise">
-       <div id="top_selling_products_carousel" class="container">
-           <div id="TopuniqueId" class="large-12 columns">
-               <div id="bestSellCarousel" class="container carousel slide" data-bs-ride="carousel"
-                    t-att-data-bs-interval="interval">
-                   <div class="carousel-inner row w-100 mx-auto" role="listbox">
-                        <t t-foreach="chunkData" t-as="data" t-key="data_index">
-                            <div t-att-class="data.is_active ? 'carousel-item active' : 'carousel-item'">
-                                <div class="row">
-                                   <t t-foreach="data" t-as="vals" t-key="vals_index">
-                                        <div class="block span3 col-3">
-                                            <div class="card-group">
-                                                <div class="card">
-                                                    <a t-attf-href="/event-details/#{vals.id}">
-                                                        <img class="card-img-top"
-                                                             t-attf-src="data:image/png;base64,{{vals.photo}}"
-                                                             style="padding: 0px; margin: 0px; height: 260px; width:305px;"/>
-                                                        <div class="text-center">
-                                                            <h3 class="mb-0"><t t-esc="vals.name"/></h3>
-                                                            <h5 class="mb-0"><t t-esc="vals.start_date"/></h5>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-                            </div>
-                        </t>
-                   </div>
-               </div>
-               <a id="template_previous" t-attf-href="#bestSellCarousel" class="carousel-control-prev" data-bs-slide="prev" role="button"
-                  aria-label="Previous" title="Previous">
-                    <span class="fa fa-chevron-circle-left fa-2x" style="color:black"/>
-                    <span class="visually-hidden">Previous</span>
-               </a>
-               <a id="template_next" t-attf-href="#bestSellCarousel" class="carousel-control-next" data-bs-slide="next" role="button"
-                  aria-label="Next" title="Next">
-                    <span class="fa fa-chevron-circle-right fa-2x" style="color:black"/>
-                   <span class="visually-hidden">Next</span>
-               </a>
-           </div>
-       </div>
-   </t>
-</templates>
-
-
-
-
-
 # -*- coding:utf-8 -*-
 
 from odoo import http
@@ -116,7 +63,7 @@ from odoo.http import request
 class EventController(http.Controller):
     @http.route(['/latest-events'], type="json", auth="public")
     def latest_events(self):
-        events = request.env['school.event'].search([], order="create_date desc", limit=4)
+        events = request.env['school.event'].search([], order="create_date desc", limit=10)
         event_data = []
         for event in events:
             event_data.append({
@@ -129,19 +76,15 @@ class EventController(http.Controller):
             })
         return event_data
 
+
     @http.route('/event-details/<model("school.event"):event>', type="http", auth="user", website=True)
     def event_details(self, event):
-        events = {
-            'event': event,
-        }
-        print("event",event)
-        return request.render('school_management.template_event_details', events)
+        return request.render('school_management.template_event_details', {
+            'event': event
+        })
 
 
-@http.route('/event-details/<model("school.event"):event>', type="http", auth="user", website=True)
-def event_details(self, event):
-   return request.render('school_management.template_event_details', {
-      'event': event})
+
 
 
 <?xml version="1.0" encoding="utf-8"?>
@@ -149,25 +92,30 @@ def event_details(self, event):
     <template id="template_event_details" name="Event Details">
         <t t-call="website.layout">
             <div class="container">
-                <h1>Hello</h1>
-                <div class="oe_structure"/>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="col-6">
-<!--                            <div class="eve_details">-->
-                                <h1 t-field="vals.name"/>
-    <!--                            <ul class="prod_desc_list">-->
-    <!--                                <li><t t-esc="product.brand"/></li>-->
-    <!--                                <li><t t-esc="product.category"/></li>-->
-    <!--                                <li><t t-esc="product.origin"/></li>-->
-    <!--                                <li><t t-esc="product.code"/></li>-->
-    <!--                            </ul>-->
-    <!--                            <span t-field="product.description"/>-->
-    <!--                            <div class="prod_buttons">-->
-    <!--                                <button class="btn btn-primary"-->
-    <!--                                        t-options="{'widget': 'button'}"/>-->
-    <!--                            </div>-->
-<!--                            </div>-->
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <br/>
+                            <h1 class="ref-section_head ref-centerhead__underline ref-head--primary"
+                   style="color: #0d5272;"><t t-esc="event.name"/></h1>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img class="card-img-top"
+                                 t-attf-src="data:image/png;base64,{{event.photo}}"
+                                 style="padding: 0px; margin: 0px; height: 260px; width:305px;"/>
+                        </div>
+                        <div class="col-md-6">
+                            <br/>
+                            <br/>
+                            <h4><strong>Club Hosting the Event :</strong> <t t-esc="event.club_id.name"/></h4>
+                            <br/>
+                            <h5><strong>Start Date :</strong> <t t-esc="event.start_date"/></h5>
+                            <br/>
+                            <h5><strong>End Date :</strong> <t t-esc="event.end_date"/></h5>
+                            <br/>
+                            <h5><strong>Total No. of days :</strong> <t t-esc="event.period"/></h5>
                         </div>
                     </div>
                 </div>
@@ -175,6 +123,8 @@ def event_details(self, event):
         </t>
     </template>
 </odoo>
+
+
 
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
@@ -185,7 +135,6 @@ def event_details(self, event):
                 <h1 class="ref-section_head ref-centerhead__underline ref-head--primary"
                    style="color: #0d5272;">Latest Events
                 </h1>
-                   <br/>
                </div>
             </div>
             <div id="top_selling_carousel"/>
@@ -193,7 +142,8 @@ def event_details(self, event):
     </template>
     <template id="external_snippets" inherit_id="website.snippets" priority="8">
         <xpath expr="//snippets[@id='snippet_content']//t[@t-snippet][last()]" position="after">
-            <t t-snippet="school_management.school_event_template"/>
+            <t t-snippet="school_management.school_event_template" string="Events"
+               t-thumbnail="/school_management/static/src/img/snippets_thumbs/s_hr.svg"/>
         </xpath>
     </template>
 </odoo>
@@ -206,18 +156,15 @@ import PublicWidget from "@web/legacy/js/public/public_widget";
 import { rpc } from "@web/core/network/rpc";
 import { renderToElement } from "@web/core/utils/render";
 
-console.log("1");
-
 function _chunk(array, size) {
     const result = [];
-    console.log("2");
     for (let i = 0; i < array.length; i += size) {
         result.push(array.slice(i, i + size));
     }
     return result;
-    console.log("result",result);
 }
-console.log("3");
+
+let uniqueCarousal = 0;
 
 var LatestEventsSnippet = PublicWidget.Widget.extend({
     selector: '.best_seller_product_snippet',
@@ -227,14 +174,20 @@ var LatestEventsSnippet = PublicWidget.Widget.extend({
     start: function () {
         const refElements = this.$el.find("#top_selling_carousel")
         const chunkData = _chunk(this.data, 4)
-        console.log(chunkData,"chunkdata")
+        chunkData[0].is_active = true
+        const unique_id = `carousel_${uniqueCarousal++}`;
+        console.log("chunk",chunkData)
+        console.log("unique",unique_id)
         refElements.html(renderToElement('school_management.products_category_wise', {
-                chunkData
+                chunkData,
+                unique_id
         }))
     },
 });
-console.log("6")
 PublicWidget.registry.latest_school_events_template = LatestEventsSnippet;
 return LatestEventsSnippet;
+
+
+
 
 
