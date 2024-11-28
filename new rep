@@ -188,53 +188,56 @@ PublicWidget.registry.latest_school_events_template = LatestEventsSnippet;
 return LatestEventsSnippet;
 
 
-
-<template id="cart">
-    <t t-call="website.layout">
-        <!-- Existing Cart Content -->
-        <div class="container mt-5">
-            <t t-set="cart_url" t-value="'/shop/cart/update_json'"/>
-            <button id="clear_cart_button" class="btn btn-danger" type="button">Clear Cart</button>
-        </div>
-    </t>
-</template>
-
-
-/** @odoo-module */
-
 import { rpc } from "@web/core/network/rpc";
-
-document.addEventListener("DOMContentLoaded", () => {
-    const clearCartButton = document.getElementById("clear_cart_button");
-
-    if (clearCartButton) {
-        clearCartButton.addEventListener("click", async () => {
-            const confirmation = confirm("Are you sure you want to clear all items from the cart?");
-            if (confirmation) {
-                try {
-                    await rpc("/shop/cart/clear", { method: "POST" });
-                    alert("All items have been removed from the cart.");
-                    location.reload();
-                } catch (error) {
-                    console.error("Error clearing cart:", error);
-                    alert("Failed to clear the cart. Please try again.");
-                }
+$(document).ready(function () {
+    console.log("2")
+    $('#clear_cart_button').each(function () {
+        var clear_cart_button = this;
+        console.log("3",clear_cart_button)
+        $(clear_cart_button).on('click',function(){
+            console.log("4")
+            if(confirm('Are you sure you want to clear cart?')){
+                console.log("5")
             }
         });
-    }
+    });
+    $('#item_remove_button').each(function () {
+        var item_remove_button = this;
+        $(item_remove_button).on('click',function(){
+            if(confirm('Are you sure you want to remove the item')){
+                console.log("6")
+            }
+        });
+    });
 });
-
 
 from odoo import http
 from odoo.http import request
 
 class ClearCartController(http.Controller):
-    @http.route('/shop/cart/clear', type='json', auth='public', methods=['POST'])
+    @http.route('/shop/clear-cart', type='json', auth='public', methods=['POST'])
     def clear_cart(self):
-        order = request.website.sale_get_order(force_create=False)
+        print("hii")
+        order = request.website.sale_get_order()
         if order:
-            order.order_line.unlink()  # Remove all items from the cart
-            order._compute_cart_info()  # Recalculate cart details
-        return {'success': True}
-
-
+            print("heyyy")
+            order.website_order_line.unlink()
+            order.website_compute_cart_info()
+            # super(SaleOrder, self)._compute_cart_info()
+            return {'success': True}
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="clear_cart_button" inherit_id="website_sale.cart_lines" customize_show="True" name="Clear Cart Button">
+         <xpath expr="//div[@id='cart_products']" position="inside">
+             <br>
+                 <br/>
+             </br>
+             <button name="clear_cart_button" class="btn btn-primary" id="clear_cart_button">Clear Cart</button>
+         </xpath>
+        <xpath expr="//div[@class='d-flex flex-column align-items-end']" position="after">
+             <button name="remove_button" class="btn btn-primary" id="item_remove_button">
+                 <i class="fa fa-trash" aria-hidden="true"/>
+             </button>
+        </xpath>
+    </template>
+</odoo>
