@@ -189,5 +189,52 @@ return LatestEventsSnippet;
 
 
 
+<template id="cart">
+    <t t-call="website.layout">
+        <!-- Existing Cart Content -->
+        <div class="container mt-5">
+            <t t-set="cart_url" t-value="'/shop/cart/update_json'"/>
+            <button id="clear_cart_button" class="btn btn-danger" type="button">Clear Cart</button>
+        </div>
+    </t>
+</template>
+
+
+/** @odoo-module */
+
+import { rpc } from "@web/core/network/rpc";
+
+document.addEventListener("DOMContentLoaded", () => {
+    const clearCartButton = document.getElementById("clear_cart_button");
+
+    if (clearCartButton) {
+        clearCartButton.addEventListener("click", async () => {
+            const confirmation = confirm("Are you sure you want to clear all items from the cart?");
+            if (confirmation) {
+                try {
+                    await rpc("/shop/cart/clear", { method: "POST" });
+                    alert("All items have been removed from the cart.");
+                    location.reload();
+                } catch (error) {
+                    console.error("Error clearing cart:", error);
+                    alert("Failed to clear the cart. Please try again.");
+                }
+            }
+        });
+    }
+});
+
+
+from odoo import http
+from odoo.http import request
+
+class ClearCartController(http.Controller):
+    @http.route('/shop/cart/clear', type='json', auth='public', methods=['POST'])
+    def clear_cart(self):
+        order = request.website.sale_get_order(force_create=False)
+        if order:
+            order.order_line.unlink()  # Remove all items from the cart
+            order._compute_cart_info()  # Recalculate cart details
+        return {'success': True}
 
 
